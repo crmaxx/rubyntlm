@@ -41,6 +41,8 @@ require 'openssl'
 require 'openssl/digest'
 require 'socket'
 
+require 'unicode_utils/upcase'
+
 # Load Order is important here
 require 'net/ntlm/exceptions'
 require 'net/ntlm/field'
@@ -134,7 +136,7 @@ module Net
       # Generates a Lan Manager Hash
       # @param [String] password The password to base the hash on
       def lm_hash(password)
-        keys = gen_keys password.upcase.ljust(14, "\0")
+        keys = gen_keys UnicodeUtils.upcase(password).ljust(14, "\0")
         apply_des(LM_MAGIC, keys).join
       end
 
@@ -157,11 +159,11 @@ module Net
       def ntlmv2_hash(user, password, target, opt={})
         if is_ntlm_hash? password
           decoded_password = EncodeUtil.decode_utf16le(password)
-          ntlmhash = [decoded_password.upcase[33,65]].pack('H32')
+          ntlmhash = [UnicodeUtils.upcase(decoded_password)[33,65]].pack('H32')
         else
           ntlmhash = ntlm_hash(password, opt)
         end
-        userdomain = user.upcase + target
+        userdomain = UnicodeUtils.upcase(user) + target
         unless opt[:unicode]
           userdomain = EncodeUtil.encode_utf16le(userdomain)
         end

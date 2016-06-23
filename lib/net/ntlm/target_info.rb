@@ -1,3 +1,5 @@
+require 'unicode_utils/upcase'
+
 module Net
   module NTLM
 
@@ -62,7 +64,7 @@ module Net
           id = av_pair_sequence[offset..offset+1]
 
           unless VALID_PAIR_ID.include?(id)
-            raise Net::NTLM::InvalidTargetDataError.new( 
+            raise Net::NTLM::InvalidTargetDataError.new(
               "Invalid AvId #{to_hex(id)} in AV_PAIR structure",
               av_pair_sequence
             )
@@ -82,7 +84,9 @@ module Net
 
       def to_hex(str)
         return nil if str.nil?
-        str.bytes.map {|b| '0x' + b.to_s(16).rjust(2,'0').upcase}.join('-')
+        str.bytes.map do |b|
+          '0x' + UnicodeUtils.upcase(b.to_s(16).rjust(2, '0'))
+        end.join('-')
       end
     end
   end

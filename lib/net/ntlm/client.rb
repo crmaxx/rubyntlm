@@ -1,7 +1,8 @@
+require 'unicode_utils/upcase'
+
 module Net
   module NTLM
     class Client
-
       DEFAULT_FLAGS = NTLM::FLAGS[:UNICODE] | NTLM::FLAGS[:OEM] |
         NTLM::FLAGS[:SIGN]   | NTLM::FLAGS[:SEAL]         | NTLM::FLAGS[:REQUEST_TARGET] |
         NTLM::FLAGS[:NTLM]   | NTLM::FLAGS[:ALWAYS_SIGN]  | NTLM::FLAGS[:NTLM2_KEY] |
@@ -19,7 +20,7 @@ module Net
       # @option opts [String] :workstation local workstation name
       # @option opts [Fixnum] :flags (DEFAULT_FLAGS) see Net::NTLM::Message::Type1.flag
       def initialize(username, password, opts = {})
-        @username     = username
+        @username     = UnicodeUtils.upcase(username)
         @password     = password
         @domain       = opts[:domain] || nil
         @workstation  = opts[:workstation] || nil
@@ -57,9 +58,8 @@ module Net
 
         type1
       end
-
     end
   end
 end
 
-require "net/ntlm/client/session"
+require 'net/ntlm/client/session'

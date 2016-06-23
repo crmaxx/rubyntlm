@@ -1,10 +1,11 @@
+require 'unicode_utils/upcase'
+
 module Net
   module NTLM
     class Client::Session
-
       VERSION_MAGIC = "\x01\x00\x00\x00"
-      TIME_OFFSET   = 11644473600
-      MAX64         = 0xffffffffffffffff
+      TIME_OFFSET   = 11_644_473_600
+      MAX64         = 0xf_fff_fff_fff_fff_fff
       CLIENT_TO_SERVER_SIGNING = "session key to client-to-server signing key magic constant\0"
       SERVER_TO_CLIENT_SIGNING = "session key to server-to-client signing key magic constant\0"
       CLIENT_TO_SERVER_SEALING = "session key to client-to-server sealing key magic constant\0"
@@ -26,12 +27,12 @@ module Net
       def authenticate!
         calculate_user_session_key!
         type3_opts = {
-          :lm_response   => lmv2_resp,
-          :ntlm_response => ntlmv2_resp,
-          :domain        => domain,
-          :user          => username,
-          :workstation   => workstation,
-          :flag          => (challenge_message.flag & client.flags)
+          lm_response:   lmv2_resp,
+          ntlm_response: ntlmv2_resp,
+          domain:        domain,
+          user:          UnicodeUtils.upcase(username),
+          workstation:   workstation,
+          flag:          (challenge_message.flag & client.flags)
         }
         t3 = Message::Type3.create type3_opts
         if negotiate_key_exchange?
@@ -89,9 +90,8 @@ module Net
 
       private
 
-
       def user_session_key
-        @user_session_key ||=  nil
+        @user_session_key ||= nil
       end
 
       def sequence
@@ -189,7 +189,11 @@ module Net
       end
 
       def ntlmv2_hash
-        @ntlmv2_hash ||= NTLM.ntlmv2_hash(username, password, domain, {:client_challenge => client_challenge, :unicode => !use_oem_strings?})
+        @ntlmv2_hash ||= NTLM.ntlmv2_hash(username,
+                                          password,
+                                          domain,
+                                          client_challenge: client_challenge,
+                                          unicode: !use_oem_strings?)
       end
 
       def calculate_user_session_key!
@@ -197,7 +201,9 @@ module Net
       end
 
       def lmv2_resp
-        OpenSSL::HMAC.digest(OpenSSL::Digest::MD5.new, ntlmv2_hash, server_challenge + client_challenge) + client_challenge
+        OpenSSL::HMAC.digest(OpenSSL::Digest::MD5.new,
+                             ntlmv2_hash,
+                             server_challenge + client_challenge) + client_challenge
       end
 
       def ntlmv2_resp
@@ -231,7 +237,6 @@ module Net
           end
         end
       end
-
     end
   end
 end

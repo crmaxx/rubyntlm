@@ -7,10 +7,9 @@ Gem::Specification.new do |s|
   s.summary = 'Ruby/NTLM library.'
   s.description = 'Ruby/NTLM provides message creator and parser for the NTLM authentication.'
 
-  s.authors = ['Kohei Kajimoto','Paul Morton']
-  s.email = ['koheik@gmail.com','paul.e.morton@gmail.com']
+  s.authors = ['Kohei Kajimoto', 'Paul Morton']
+  s.email = ['koheik@gmail.com', 'paul.e.morton@gmail.com']
   s.homepage = 'https://github.com/winrb/rubyntlm'
-
 
   s.files         = `git ls-files`.split($/)
   s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
@@ -25,4 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec", ">= 2.11"
   s.add_development_dependency "simplecov"
+
+  s.add_runtime_dependency "unicode_utils"
 end
