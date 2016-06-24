@@ -1,10 +1,8 @@
 module Net
   module NTLM
-
     # base class of data structure
     class FieldSet
-      class << FieldSet
-
+      class << self
         # @macro string_security_buffer
         #   @method $1
         #   @method $1=
@@ -17,7 +15,7 @@ module Net
         #   @method $1
         #   @method $1=
         #   @return [Int16LE]
-        def int16LE(name, opts)
+        def int16le(name, opts)
           add_field(name, Net::NTLM::Int16LE, opts)
         end
 
@@ -25,7 +23,7 @@ module Net
         #   @method $1
         #   @method $1=
         #   @return [Int32LE]
-        def int32LE(name, opts)
+        def int32le(name, opts)
           add_field(name, Net::NTLM::Int32LE, opts)
         end
 
@@ -33,7 +31,7 @@ module Net
         #   @method $1
         #   @method $1=
         #   @return [Int64]
-        def int64LE(name, opts)
+        def int64le(name, opts)
           add_field(name, Net::NTLM::Int64LE, opts)
         end
 

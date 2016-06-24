@@ -1,9 +1,9 @@
 module Net
   module NTLM
     class SecurityBuffer < FieldSet
-      int16LE :length, value: 0
-      int16LE :allocated, value: 0
-      int32LE :offset, value: 0
+      int16le :length, value: 0
+      int16le :allocated, value: 0
+      int32le :offset, value: 0
 
       attr_accessor :active
       attr_reader :value

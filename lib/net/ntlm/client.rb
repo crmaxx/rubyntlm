@@ -4,9 +4,9 @@ module Net
   module NTLM
     class Client
       DEFAULT_FLAGS = NTLM::FLAGS[:UNICODE] | NTLM::FLAGS[:OEM] |
-        NTLM::FLAGS[:SIGN]   | NTLM::FLAGS[:SEAL]         | NTLM::FLAGS[:REQUEST_TARGET] |
-        NTLM::FLAGS[:NTLM]   | NTLM::FLAGS[:ALWAYS_SIGN]  | NTLM::FLAGS[:NTLM2_KEY] |
-        NTLM::FLAGS[:KEY128] | NTLM::FLAGS[:KEY_EXCHANGE] | NTLM::FLAGS[:KEY56]
+                      NTLM::FLAGS[:SIGN] | NTLM::FLAGS[:SEAL] | NTLM::FLAGS[:REQUEST_TARGET] |
+                      NTLM::FLAGS[:NTLM] | NTLM::FLAGS[:ALWAYS_SIGN] | NTLM::FLAGS[:NTLM2_KEY] |
+                      NTLM::FLAGS[:KEY128] | NTLM::FLAGS[:KEY_EXCHANGE] | NTLM::FLAGS[:KEY56]
 
       attr_reader :username, :password, :domain, :workstation, :flags, :session
 

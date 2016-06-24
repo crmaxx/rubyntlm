@@ -4,17 +4,17 @@ module Net
       # @private false
       class Type3 < Message
         string :sign, size: 8, value: SSP_SIGN
-        int32LE :type, value: 3
+        int32le :type, value: 3
         security_buffer :lm_response, value: ""
         security_buffer :ntlm_response, value: ""
         security_buffer :domain, value: ""
         security_buffer :user, value: ""
         security_buffer :workstation, value: ""
         security_buffer :session_key, value: "", active: false
-        int32LE :flag, value: 0, active: false
+        int32le :flag, value: 0, active: false
         string :os_version, size: 8, active: false
 
-        class << Type3
+        class << self
           # Builds a Type 3 packet
           # @note All options must be properly encoded with either unicode or oem encoding
           # @return [Type3]

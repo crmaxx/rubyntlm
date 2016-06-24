@@ -6,11 +6,11 @@ module Net
       # @private false
       class Type2 < Message
         string :sign, size: 8, value: SSP_SIGN
-        int32LE :type, value: 2
+        int32le :type, value: 2
         security_buffer :target_name, size: 0, value: ""
-        int32LE :flag, value: DEFAULT_FLAGS[:TYPE2]
-        int64LE :challenge, value: 0
-        int64LE :context, value: 0, active: false
+        int32le :flag, value: DEFAULT_FLAGS[:TYPE2]
+        int64le :challenge, value: 0
+        int64le :context, value: 0, active: false
         security_buffer :target_info, value: "", active: false
         string :os_version, size: 8, value: "", active: false
 
