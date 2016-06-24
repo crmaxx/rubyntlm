@@ -51,17 +51,17 @@ module Net
 
         def names
           return [] if @proto.nil?
-          @proto.map{|n, t, o| n}
+          @proto.map { |n, _, _| n }
         end
 
         def types
           return [] if @proto.nil?
-          @proto.map{|n, t, o| t}
+          @proto.map { |_, t, _| t }
         end
 
         def opts
           return [] if @proto.nil?
-          @proto.map{|n, t, o| o}
+          @proto.map { |_, _, o| o }
         end
 
         private
@@ -85,30 +85,30 @@ module Net
       end
 
       def initialize
-        @alist = self.class.prototypes.map{ |n, t, o| [n, t.new(o)] }
+        @alist = self.class.prototypes.map { |n, t, o| [n, t.new(o)] }
       end
 
-      def parse(str, offset=0)
-        @alist.inject(offset){|cur, a| cur += a[1].parse(str, cur)}
+      def parse(str, offset = 0)
+        @alist.inject(offset) { |cur, a| cur + a[1].parse(str, cur) }
       end
 
       def serialize
-        @alist.map{|n, f| f.serialize }.join
+        @alist.map { |_, f| f.serialize }.join
       end
 
       def size
-        @alist.inject(0){|sum, a| sum += a[1].size}
+        @alist.inject(0) { |sum, a| sum + a[1].size }
       end
 
       def [](name)
         a = @alist.assoc(name.to_s.intern)
-        raise ArgumentError, "no such field: #{name}" unless a
+        fail ArgumentError, "no such field: #{name}" unless a
         a[1]
       end
 
       def []=(name, val)
         a = @alist.assoc(name.to_s.intern)
-        raise ArgumentError, "no such field: #{name}" unless a
+        fail ArgumentError, "no such field: #{name}" unless a
         a[1] = val
       end
 
@@ -120,10 +120,9 @@ module Net
         self[name].active = false
       end
 
-      def has_disabled_fields?
-        @alist.any? { |name, field| !field.active }
+      def disabled_fields?
+        @alist.any? { |_name, field| !field.active }
       end
     end
-
   end
 end

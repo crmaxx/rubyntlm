@@ -5,14 +5,14 @@ module Net
     class Message
       # @private false
       class Type2 < Message
-        string          :sign,        { size: 8, value: SSP_SIGN }
-        int32LE         :type,        { value: 2 }
-        security_buffer :target_name, { size: 0, value: "" }
-        int32LE         :flag,        { value: DEFAULT_FLAGS[:TYPE2] }
-        int64LE         :challenge,   { value: 0 }
-        int64LE         :context,     { value: 0, active: false }
-        security_buffer :target_info, { value: "", active: false }
-        string          :os_version,  { size: 8, value: "", active: false }
+        string :sign, size: 8, value: SSP_SIGN
+        int32LE :type, value: 2
+        security_buffer :target_name, size: 0, value: ""
+        int32LE :flag, value: DEFAULT_FLAGS[:TYPE2]
+        int64LE :challenge, value: 0
+        int64LE :context, value: 0, active: false
+        security_buffer :target_info, value: "", active: false
+        string :os_version, size: 8, value: "", active: false
 
         # Generates a Type 3 response based on the Type 2 Information
         # @return [Type3]
@@ -44,7 +44,7 @@ module Net
           cc = NTLM.pack_int64le(cc) if cc.is_a?(Integer)
           opt[:client_challenge] = cc
 
-          if has_flag?(:OEM) && opt[:unicode]
+          if flag?(:OEM) && opt[:unicode]
             usr = NTLM::EncodeUtil.decode_utf16le(usr)
             pwd = NTLM::EncodeUtil.decode_utf16le(pwd)
             ws  = NTLM::EncodeUtil.decode_utf16le(ws)
@@ -52,7 +52,7 @@ module Net
             opt[:unicode] = false
           end
 
-          if has_flag?(:UNICODE) && !opt[:unicode]
+          if flag?(:UNICODE) && !opt[:unicode]
             usr = NTLM::EncodeUtil.encode_utf16le(usr)
             pwd = NTLM::EncodeUtil.encode_utf16le(pwd)
             ws  = NTLM::EncodeUtil.encode_utf16le(ws)
@@ -68,7 +68,7 @@ module Net
             ar = { ntlmv2_hash: NTLM.ntlmv2_hash(usr, pwd, domain, opt), challenge: chal, target_info: ti }
             lm_res = NTLM.lmv2_response(ar, opt)
             ntlm_res = NTLM.ntlmv2_response(ar, opt)
-          elsif has_flag?(:NTLM2_KEY)
+          elsif flag?(:NTLM2_KEY)
             ar = { ntlm_hash: NTLM.ntlm_hash(pwd, opt), challenge: chal }
             lm_res, ntlm_res = NTLM.ntlm2_session(ar, opt)
           else

@@ -8,7 +8,7 @@ module Net
         NTLM::FLAGS[:NTLM]   | NTLM::FLAGS[:ALWAYS_SIGN]  | NTLM::FLAGS[:NTLM2_KEY] |
         NTLM::FLAGS[:KEY128] | NTLM::FLAGS[:KEY_EXCHANGE] | NTLM::FLAGS[:KEY56]
 
-      attr_reader :username, :password, :domain, :workstation, :flags
+      attr_reader :username, :password, :domain, :workstation, :flags, :session
 
       # @note All string parameters should be encoded in UTF-8. The proper
       #   final encoding for placing in the various {Message messages} will be
@@ -36,11 +36,6 @@ module Net
           @session = Client::Session.new(self, Net::NTLM::Message.decode64(resp), channel_binding)
           @session.authenticate!
         end
-      end
-
-      # @return [Client::Session]
-      def session
-        @session
       end
 
       def session_key

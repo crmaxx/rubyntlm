@@ -2,11 +2,9 @@ require 'unicode_utils/upcase'
 
 module Net
   module NTLM
-
     # Represents a list of AV_PAIR structures
     # @see https://msdn.microsoft.com/en-us/library/cc236646.aspx
     class TargetInfo
-
       # Allowed AvId values for an AV_PAIR
       MSV_AV_EOL               = "\x00\x00".freeze
       MSV_AV_NB_COMPUTER_NAME  = "\x01\x00".freeze
@@ -29,7 +27,7 @@ module Net
 
       def to_s
         result = ''
-        av_pairs.each do |k,v|
+        av_pairs.each do |k, v|
           result << k
           result << [v.length].pack('S')
           result << v
@@ -42,17 +40,17 @@ module Net
       private
 
       VALID_PAIR_ID = [
-          MSV_AV_EOL,
-          MSV_AV_NB_COMPUTER_NAME,
-          MSV_AV_NB_DOMAIN_NAME,
-          MSV_AV_DNS_COMPUTER_NAME,
-          MSV_AV_DNS_DOMAIN_NAME,
-          MSV_AV_DNS_TREE_NAME,
-          MSV_AV_FLAGS,
-          MSV_AV_TIMESTAMP,
-          MSV_AV_SINGLE_HOST,
-          MSV_AV_TARGET_NAME,
-          MSV_AV_CHANNEL_BINDINGS
+        MSV_AV_EOL,
+        MSV_AV_NB_COMPUTER_NAME,
+        MSV_AV_NB_DOMAIN_NAME,
+        MSV_AV_DNS_COMPUTER_NAME,
+        MSV_AV_DNS_DOMAIN_NAME,
+        MSV_AV_DNS_TREE_NAME,
+        MSV_AV_FLAGS,
+        MSV_AV_TIMESTAMP,
+        MSV_AV_SINGLE_HOST,
+        MSV_AV_TARGET_NAME,
+        MSV_AV_CHANNEL_BINDINGS
       ].freeze
 
       def read_pairs(av_pair_sequence)
@@ -61,18 +59,18 @@ module Net
         return result if av_pair_sequence.nil?
 
         until offset >= av_pair_sequence.length
-          id = av_pair_sequence[offset..offset+1]
+          id = av_pair_sequence[offset..offset + 1]
 
           unless VALID_PAIR_ID.include?(id)
-            raise Net::NTLM::InvalidTargetDataError.new(
+            fail Net::NTLM::InvalidTargetDataError.new(
               "Invalid AvId #{to_hex(id)} in AV_PAIR structure",
               av_pair_sequence
             )
           end
 
-          length = av_pair_sequence[offset+2..offset+3].unpack('S')[0].to_i
+          length = av_pair_sequence[offset + 2..offset + 3].unpack('S')[0].to_i
           if length > 0
-            value = av_pair_sequence[offset+4..offset+4+length-1]
+            value = av_pair_sequence[offset + 4..offset + 4 + length - 1]
             result[id] = value
           end
 

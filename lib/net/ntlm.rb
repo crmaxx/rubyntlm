@@ -68,14 +68,11 @@ require 'net/ntlm/target_info'
 
 module Net
   module NTLM
-
     LM_MAGIC = "KGS!@\#$%"
-    TIME_OFFSET = 11644473600
+    TIME_OFFSET = 11_644_473_600
     MAX64 = 0xffffffffffffffff
 
-
     class << self
-
       # Valid format for LAN Manager hex digest portion: 32 hexadecimal characters.
       LAN_MANAGER_HEX_DIGEST_REGEXP = /[0-9a-f]{32}/i
       # Valid format for NT LAN Manager hex digest portion: 32 hexadecimal characters.
@@ -86,7 +83,7 @@ module Net
       # Takes a string and determines whether it is a valid NTLM Hash
       # @param [String] the string to validate
       # @return [Boolean] whether or not the string is a valid NTLM hash
-      def is_ntlm_hash?(data)
+      def ntlm_hash?(data)
         decoded_data = data.dup
         decoded_data = EncodeUtil.decode_utf16le(decoded_data)
         if DATA_REGEXP.match(decoded_data)
@@ -99,7 +96,7 @@ module Net
       # Conver the value to a 64-Bit Little Endian Int
       # @param [String] val The string to convert
       def pack_int64le(val)
-          [val & 0x00000000ffffffff, val >> 32].pack("V2")
+        [val & 0x00000000ffffffff, val >> 32].pack("V2")
       end
 
       # Builds an array of strings that are 7 characters long
@@ -107,9 +104,7 @@ module Net
       # @api private
       def split7(str)
         s = str.dup
-        until s.empty?
-          (ret ||= []).push s.slice!(0, 7)
-        end
+        (ret ||= []).push s.slice!(0, 7) until s.empty?
         ret
       end
 
@@ -117,20 +112,21 @@ module Net
       # @param [String] str String to generate keys for
       # @api private
       def gen_keys(str)
-        split7(str).map{ |str7|
-          bits = split7(str7.unpack("B*")[0]).inject('')\
-            {|ret, tkn| ret += tkn + (tkn.gsub('1', '').size % 2).to_s }
+        split7(str).map do |str7|
+          bits = split7(str7.unpack("B*")[0]).inject('') do |ret, tkn|
+            ret + tkn + (tkn.gsub('1', '').size % 2).to_s
+          end
           [bits].pack("B*")
-        }
+        end
       end
 
       def apply_des(plain, keys)
         dec = OpenSSL::Cipher::Cipher.new("des-cbc")
         dec.padding = 0
-        keys.map {|k|
+        keys.map do |k|
           dec.key = k
           dec.encrypt.update(plain) + dec.final
-        }
+        end
       end
 
       # Generates a Lan Manager Hash
@@ -145,9 +141,7 @@ module Net
       # @option opt :unicode (false) Unicode encode the password
       def ntlm_hash(password, opt = {})
         pwd = password.dup
-        unless opt[:unicode]
-          pwd = EncodeUtil.encode_utf16le(pwd)
-        end
+        pwd = EncodeUtil.encode_utf16le(pwd) unless opt[:unicode]
         OpenSSL::Digest::MD4.digest pwd
       end
 
@@ -156,17 +150,15 @@ module Net
       # @param [String] password The password
       # @param [String] target The domain or workstation to authenticate to
       # @option opt :unicode (false) Unicode encode the domain
-      def ntlmv2_hash(user, password, target, opt={})
-        if is_ntlm_hash? password
+      def ntlmv2_hash(user, password, target, opt = {})
+        if ntlm_hash? password
           decoded_password = EncodeUtil.decode_utf16le(password)
-          ntlmhash = [UnicodeUtils.upcase(decoded_password)[33,65]].pack('H32')
+          ntlmhash = [UnicodeUtils.upcase(decoded_password)[33, 65]].pack('H32')
         else
           ntlmhash = ntlm_hash(password, opt)
         end
         userdomain = UnicodeUtils.upcase(user) + target
-        unless opt[:unicode]
-          userdomain = EncodeUtil.encode_utf16le(userdomain)
-        end
+        userdomain = EncodeUtil.encode_utf16le(userdomain) unless opt[:unicode]
         OpenSSL::HMAC.digest(OpenSSL::Digest::MD5.new, ntlmhash, userdomain)
       end
 
@@ -177,7 +169,7 @@ module Net
         rescue
           raise ArgumentError
         end
-        chal = NTLM::pack_int64le(chal) if chal.is_a?(Integer)
+        chal = NTLM.pack_int64le(chal) if chal.is_a?(Integer)
         keys = gen_keys hash.ljust(21, "\0")
         apply_des(chal, keys).join
       end
@@ -185,7 +177,7 @@ module Net
       def ntlm_response(arg)
         hash = arg[:ntlm_hash]
         chal = arg[:challenge]
-        chal = NTLM::pack_int64le(chal) if chal.is_a?(Integer)
+        chal = NTLM.pack_int64le(chal) if chal.is_a?(Integer)
         keys = gen_keys hash.ljust(21, "\0")
         apply_des(chal, keys).join
       end
@@ -198,14 +190,14 @@ module Net
         rescue
           raise ArgumentError
         end
-        chal = NTLM::pack_int64le(chal) if chal.is_a?(Integer)
+        chal = NTLM.pack_int64le(chal) if chal.is_a?(Integer)
 
         if opt[:client_challenge]
-          cc  = opt[:client_challenge]
+          cc = opt[:client_challenge]
         else
           cc = rand(MAX64)
         end
-        cc = NTLM::pack_int64le(cc) if cc.is_a?(Integer)
+        cc = NTLM.pack_int64le(cc) if cc.is_a?(Integer)
 
         if opt[:timestamp]
           ts = opt[:timestamp]
@@ -229,14 +221,14 @@ module Net
         key = arg[:ntlmv2_hash]
         chal = arg[:challenge]
 
-        chal = NTLM::pack_int64le(chal) if chal.is_a?(Integer)
+        chal = NTLM.pack_int64le(chal) if chal.is_a?(Integer)
 
         if opt[:client_challenge]
-          cc  = opt[:client_challenge]
+          cc = opt[:client_challenge]
         else
           cc = rand(MAX64)
         end
-        cc = NTLM::pack_int64le(cc) if cc.is_a?(Integer)
+        cc = NTLM.pack_int64le(cc) if cc.is_a?(Integer)
 
         OpenSSL::HMAC.digest(OpenSSL::Digest::MD5.new, key, chal + cc) + cc
       end
@@ -248,14 +240,14 @@ module Net
         rescue
           raise ArgumentError
         end
-        chal = NTLM::pack_int64le(chal) if chal.is_a?(Integer)
+        chal = NTLM.pack_int64le(chal) if chal.is_a?(Integer)
 
         if opt[:client_challenge]
           cc = opt[:client_challenge]
         else
           cc = rand(MAX64)
         end
-        cc = NTLM::pack_int64le(cc) if cc.is_a?(Integer)
+        cc = NTLM.pack_int64le(cc) if cc.is_a?(Integer)
 
         keys = gen_keys(passwd_hash.ljust(21, "\0"))
         session_hash = OpenSSL::Digest::MD5.digest(chal + cc).slice(0, 8)
@@ -263,6 +255,5 @@ module Net
         [cc.ljust(24, "\0"), response]
       end
     end
-
   end
 end

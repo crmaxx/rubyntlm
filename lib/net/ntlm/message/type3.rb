@@ -1,20 +1,18 @@
 module Net
   module NTLM
     class Message
-
       # @private false
       class Type3 < Message
-
-        string          :sign,          {:size => 8, :value => SSP_SIGN}
-        int32LE         :type,          {:value => 3}
-        security_buffer :lm_response,   {:value => ""}
-        security_buffer :ntlm_response, {:value => ""}
-        security_buffer :domain,        {:value => ""}
-        security_buffer :user,          {:value => ""}
-        security_buffer :workstation,   {:value => ""}
-        security_buffer :session_key,   {:value => "", :active => false }
-        int32LE         :flag,          {:value => 0, :active => false }
-        string          :os_version,    {:size => 8, :active => false }
+        string :sign, size: 8, value: SSP_SIGN
+        int32LE :type, value: 3
+        security_buffer :lm_response, value: ""
+        security_buffer :ntlm_response, value: ""
+        security_buffer :domain, value: ""
+        security_buffer :user, value: ""
+        security_buffer :workstation, value: ""
+        security_buffer :session_key, value: "", active: false
+        int32LE :flag, value: 0, active: false
+        string :os_version, size: 8, active: false
 
         class << Type3
           # Builds a Type 3 packet
@@ -26,16 +24,13 @@ module Net
           # @option arg [String] :workstation The name of the calling workstation
           # @option arg [String] :session_key The session key
           # @option arg [Integer] :flag Flags for the packet
-          def create(arg, opt ={})
+          def create(arg)
             t = new
             t.lm_response = arg[:lm_response]
             t.ntlm_response = arg[:ntlm_response]
             t.domain = arg[:domain]
             t.user = arg[:user]
-
-            if arg[:workstation]
-              t.workstation = arg[:workstation]
-            end
+            t.workstation = arg[:workstation] if arg[:workstation]
 
             if arg[:session_key]
               t.enable(:session_key)
@@ -69,13 +64,13 @@ module Net
           when :ntlmv2
             ntlmv2_password?(password, server_challenge)
           else
-            raise
+            fail
           end
         end
 
         # @return [Symbol]
         def ntlm_version
-          if ntlm_response.size == 24 && lm_response[0,8] != "\x00"*8 && lm_response[8,16] == "\x00"*16
+          if ntlm_response.size == 24 && lm_response[0, 8] != "\x00" * 8 && lm_response[8, 16] == "\x00" * 16
             :ntlm2_session
           elsif ntlm_response.size == 24
             :ntlmv1
@@ -90,18 +85,17 @@ module Net
           hash = ntlm_response
           _lm, empty_hash = NTLM.ntlm2_session(
             {
-              :ntlm_hash => NTLM.ntlm_hash(password),
-              :challenge => server_challenge,
+              ntlm_hash: NTLM.ntlm_hash(password),
+              challenge: server_challenge
             },
             {
-              :client_challenge => lm_response[0,8]
+              client_challenge: lm_response[0, 8]
             }
           )
           hash == empty_hash
         end
 
         def ntlmv2_password?(password, server_challenge)
-
           # The first 16 bytes of the ntlm_response are the HMAC of the blob
           # that follows it.
           blob = Blob.new
@@ -111,15 +105,15 @@ module Net
             {
               # user and domain came from the serialized data here, so
               # they're already unicode
-              :ntlmv2_hash => NTLM.ntlmv2_hash(user, '', domain, :unicode => true),
-              :challenge => server_challenge,
-              :target_info => blob.target_info
+              ntlmv2_hash: NTLM.ntlmv2_hash(user, '', domain, unicode: true),
+              challenge: server_challenge,
+              target_info: blob.target_info
             },
             {
-              :client_challenge => blob.challenge,
+              client_challenge: blob.challenge,
               # The blob's timestamp is already in milliseconds since 1601,
               # so convert it back to epoch time first
-              :timestamp => (blob.timestamp / 10_000_000) - NTLM::TIME_OFFSET,
+              timestamp: (blob.timestamp / 10_000_000) - NTLM::TIME_OFFSET
             }
           )
 

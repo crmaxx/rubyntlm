@@ -1,7 +1,6 @@
 module Net
   module NTLM
     class ChannelBinding
-
       # Creates a ChannelBinding used for Extended Protection Authentication
       # @see http://blogs.msdn.com/b/openspecification/archive/2013/03/26/ntlm-and-channel-binding-hash-aka-exteneded-protection-for-authentication.aspx
       #

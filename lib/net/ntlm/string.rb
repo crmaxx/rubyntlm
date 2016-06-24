@@ -1,14 +1,13 @@
 module Net
   module NTLM
-
     class String < Field
       def initialize(opts)
         super(opts)
         @size = opts[:size]
       end
 
-      def parse(str, offset=0)
-        if @active and str.size >= offset + @size
+      def parse(str, offset = 0)
+        if @active && str.size >= offset + @size
           @value = str[offset, @size]
           @size
         else
@@ -30,6 +29,5 @@ module Net
         @active = (@size > 0)
       end
     end
-
   end
 end

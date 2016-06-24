@@ -157,11 +157,11 @@ module Net
       end
 
       def use_oem_strings?
-        challenge_message.has_flag? :OEM
+        challenge_message.flag? :OEM
       end
 
       def negotiate_key_exchange?
-        challenge_message.has_flag? :KEY_EXCHANGE
+        challenge_message.flag? :KEY_EXCHANGE
       end
 
       def username
